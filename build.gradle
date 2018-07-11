@@ -1,0 +1,107 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+      		url "https://plugins.gradle.org/m2/"
+    	}
+        maven {
+            name = 'forge'
+            url = 'http://files.minecraftforge.net/maven'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+compileJava.options.encoding = 'UTF-8'
+compileJava.sourceCompatibility = '1.7'
+compileJava.targetCompatibility = '1.7'
+
+group = project.group_name
+version = project.mod_version + "." + project.mod_revision
+archivesBaseName = "${project.mod_id}-${project.minecraft_version}"
+
+minecraft {
+    version = project.minecraft_version + "-" + project.forge_version
+	mappings = project.mappings_version
+	if (file('../multiProjectDir').exists()) {
+		runDir = "../multiProjectDir"
+	} else {
+		runDir = "eclipse"
+	}
+    replace '@MOD_ID@', project.mod_id
+    replace '@MOD_NAME@', project.mod_name
+    replace '@MOD_VERSION@', project.version
+    replace '@MINECRAFT_VERSION@', project.minecraft_version
+}
+
+dependencies {
+    // you may put jars on which you depend on in ./libs
+    // or you may define them like so..
+    //compile "some.group:artifact:version:classifier"
+    //compile "some.group:artifact:version"
+      
+    // real examples
+    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // for more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+}
+
+processResources {
+    // force replacements if input changes
+    inputs.property "version", project.mod_version
+    inputs.property "mcversion", project.minecraft_version
+	inputs.property "revision", project.mod_revision
+    inputs.property "forgeversion", project.forge_version
+    
+    // replace stuff in the files we want.
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.info'
+        include '**/*.properties'
+        include '**/*.json'
+
+        // replaces
+        expand ([
+            'mod_version': project.version,
+            'mod_featureversion': project.mod_version,
+            'mod_revision': project.mod_revision,
+            'forge_version': project.forge_version,
+            'minecraft_version': project.minecraft_version,
+            'mod_id': project.mod_id,
+            'mod_name': project.mod_name,
+        ])
+    }
+
+    // copy everything else that we didn't do before
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.info'
+        exclude '**/*.properties'
+        exclude '**/*.json'
+    }
+}
+
+jar {
+    from('src/main/java') { include 'assets/**' }
+}
+
+sourceJar {
+    appendix = 'src'
+	classifier = ''
+}
+
+artifacts {
+    archives sourceJar
+}
+

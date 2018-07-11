@@ -1,0 +1,45 @@
+## gradle
+/.gradle
+/build
+
+## ForgeGradle
+/run
+
+## eclipse
+/.settings
+/.metadata
+/.classpath
+/.project
+/bin
+/eclipse
+
+## intellij
+/out
+/.idea
+/*.iml
+/*.ipr
+/*.iws
+
+## custom
+/release
+/run
+
+# some IDE things
+.project
+.classpath
+*.launch
+
+# all compiled code
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+!gradle-wrapper.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
