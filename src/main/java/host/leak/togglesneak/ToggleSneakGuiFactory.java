@@ -13,17 +13,17 @@ public class ToggleSneakGuiFactory implements IModGuiFactory {
 	}
 
 	@Override
-	public boolean hasConfigGui() {
-		return true;
-	}
-
-	@Override
-	public GuiScreen createConfigGui(GuiScreen parentScreen) {
-		return new ToggleSneakConfigGui(parentScreen);
+	public Class<? extends GuiScreen> mainConfigGuiClass() {
+		return ToggleSneakConfigGui.class;
 	}
 
 	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
+		return null;
+	}
+
+	@Override
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
 		return null;
 	}
 }

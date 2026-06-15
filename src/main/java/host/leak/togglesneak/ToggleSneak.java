@@ -74,14 +74,14 @@ public class ToggleSneak {
 	public void deactivate(FMLModDisabledEvent event) {
 		// this class instance is already unregistered from the event bus by Forge itself
 		MinecraftForge.EVENT_BUS.unregister(guiDrawer);
-		if (mc.player != null)
-			mc.player.movementInput = new MovementInputFromOptions(mc.gameSettings);
+		if (mc.thePlayer != null)
+			mc.thePlayer.movementInput = new MovementInputFromOptions(mc.gameSettings);
 	}
 
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
 
-		if (eventArgs.getModID().equals("@MOD_ID@")) syncConfig();
+		if (eventArgs.modID.equals("@MOD_ID@")) syncConfig();
 	}
 
 	public void syncConfig() {
@@ -135,8 +135,8 @@ public class ToggleSneak {
 
 	public void clientTick() {
 		
-		if ((mc.player != null) && (!(mc.player.movementInput instanceof MovementInputModded))) {
-			mc.player.movementInput = mim;
+		if ((mc.thePlayer != null) && (!(mc.thePlayer.movementInput instanceof MovementInputModded))) {
+			mc.thePlayer.movementInput = mim;
 		}
 	}
 	
