@@ -10,6 +10,8 @@
   "togglesneak.config.panel.sneak.tooltip": "Will the sneak toggle function be enabled on startup?",
   "togglesneak.config.panel.sprint": "Sprint function enabled",
   "togglesneak.config.panel.sprint.tooltip": "Will the sprint toggle function be enabled on startup?",
+  "togglesneak.config.panel.sprintoverridessneak": "Sprint key untoggles sneak",
+  "togglesneak.config.panel.sprintoverridessneak.tooltip": "Will pressing the sprint key untoggle sneak?",
   "togglesneak.config.panel.flyboost": "Fly boost function enabled",
   "togglesneak.config.panel.flyboost.tooltip": "Fly boost activated by sprint key in creative mode",
   "togglesneak.config.panel.flyboostfactor": "Fly boost multiplier",

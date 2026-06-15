@@ -49,6 +49,7 @@ public final class ToggleSneakClient {
     private static boolean sneakToggled;
     private static boolean sprintToggled;
     private static boolean wasSneakPhysicallyDown;
+    private static boolean wasSprintPhysicallyDown;
     private static int sneakHeldTicks;
     private static float originalFlySpeed = -1.0F;
     private static float boostedFlySpeed;
@@ -107,14 +108,20 @@ public final class ToggleSneakClient {
 
         LocalPlayer player = MC.player;
         boolean physicalSneak = isPhysicallyDown(MC.options.keyShift);
+        boolean physicalSprint = isPhysicallyDown(MC.options.keySprint);
         Input input = event.getInput().keyPresses;
         boolean shift = input.shift();
         boolean sprint = input.sprint();
 
         if (sneakFeatureEnabled) {
             updateSneakToggle(player, physicalSneak);
+            if (ToggleSneakConfig.SPRINT_OVERRIDES_SNEAK.get() && physicalSprint && !wasSprintPhysicallyDown) {
+                sneakToggled = false;
+                sneakHeldTicks = 0;
+            }
             shift = physicalSneak || sneakToggled;
         }
+        wasSprintPhysicallyDown = physicalSprint;
 
         if (sprintFeatureEnabled) {
             sprintToggled = input.forward() && !input.backward() && !shift;
@@ -153,6 +160,7 @@ public final class ToggleSneakClient {
             sneakToggled = false;
             sneakHeldTicks = 0;
             wasSneakPhysicallyDown = false;
+            wasSprintPhysicallyDown = false;
         }
         if (!sprintFeatureEnabled) {
             sprintToggled = false;

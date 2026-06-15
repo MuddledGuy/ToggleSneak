@@ -27,12 +27,13 @@ public final class ToggleSneakConfigScreen extends Screen {
 
         addBooleanOption(x, y, controlWidth, "togglesneak.config.panel.sneak", ToggleSneakConfig.TOGGLE_SNEAK, () -> ToggleSneakClient.applyConfigFeatureState());
         addBooleanOption(x, y + rowHeight, controlWidth, "togglesneak.config.panel.sprint", ToggleSneakConfig.TOGGLE_SPRINT, () -> ToggleSneakClient.applyConfigFeatureState());
-        addBooleanOption(x, y + rowHeight * 2, controlWidth, "togglesneak.config.panel.flyboost", ToggleSneakConfig.FLY_BOOST, null);
-        addBooleanOption(x, y + rowHeight * 3, controlWidth, "togglesneak.config.panel.hud", ToggleSneakConfig.HUD_ENABLED, null);
+        addBooleanOption(x, y + rowHeight * 2, controlWidth, "togglesneak.config.panel.sprintoverridessneak", ToggleSneakConfig.SPRINT_OVERRIDES_SNEAK, null);
+        addBooleanOption(x, y + rowHeight * 3, controlWidth, "togglesneak.config.panel.flyboost", ToggleSneakConfig.FLY_BOOST, null);
+        addBooleanOption(x, y + rowHeight * 4, controlWidth, "togglesneak.config.panel.hud", ToggleSneakConfig.HUD_ENABLED, null);
 
-        addEnumOption(x, y + rowHeight * 4, controlWidth, "togglesneak.config.panel.display", ToggleSneakConfig.STATUS_DISPLAY, ToggleSneakConfig.StatusDisplay.values(), "togglesneak.config.status.");
-        addEnumOption(x, y + rowHeight * 5, controlWidth, "togglesneak.config.panel.hpos", ToggleSneakConfig.DISPLAY_H_POSITION, ToggleSneakConfig.HorizontalPosition.values(), "togglesneak.config.hpos.");
-        addEnumOption(x, y + rowHeight * 6, controlWidth, "togglesneak.config.panel.vpos", ToggleSneakConfig.DISPLAY_V_POSITION, ToggleSneakConfig.VerticalPosition.values(), "togglesneak.config.vpos.");
+        addEnumOption(x, y + rowHeight * 5, controlWidth, "togglesneak.config.panel.display", ToggleSneakConfig.STATUS_DISPLAY, ToggleSneakConfig.StatusDisplay.values(), "togglesneak.config.status.");
+        addEnumOption(x, y + rowHeight * 6, controlWidth, "togglesneak.config.panel.hpos", ToggleSneakConfig.DISPLAY_H_POSITION, ToggleSneakConfig.HorizontalPosition.values(), "togglesneak.config.hpos.");
+        addEnumOption(x, y + rowHeight * 7, controlWidth, "togglesneak.config.panel.vpos", ToggleSneakConfig.DISPLAY_V_POSITION, ToggleSneakConfig.VerticalPosition.values(), "togglesneak.config.vpos.");
 
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> closeToParent())
                 .bounds(this.width / 2 - 100, this.height - 32, 200, 20)

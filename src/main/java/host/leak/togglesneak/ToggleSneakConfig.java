@@ -15,6 +15,11 @@ public final class ToggleSneakConfig {
             .translation("togglesneak.config.panel.sprint")
             .define("toggleSprintEnabled", false);
 
+    public static final ForgeConfigSpec.BooleanValue SPRINT_OVERRIDES_SNEAK = BUILDER
+            .comment("Will pressing the sprint key untoggle sneak?")
+            .translation("togglesneak.config.panel.sprintoverridessneak")
+            .define("sprintOverridesSneak", false);
+
     public static final ForgeConfigSpec.BooleanValue FLY_BOOST = BUILDER
             .comment("Fly boost activated by sprint key in creative mode.")
             .translation("togglesneak.config.panel.flyboost")
