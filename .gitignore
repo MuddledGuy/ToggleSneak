@@ -4,6 +4,13 @@
 
 ## ForgeGradle
 /run
+/run-data
+/src/generated/resources
+
+## local verification artifacts
+/.tmp-*
+/forge-*-mdk.zip
+/jdk*.zip
 
 ## eclipse
 /.settings
