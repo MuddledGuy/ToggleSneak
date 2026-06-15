@@ -1,32 +1,30 @@
 package host.leak.togglesneak;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
-import org.lwjgl.input.Keyboard;
-
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MovementInputFromOptions;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.common.Configuration;
+import cpw.mods.fml.client.registry.KeyBindingRegistry;
+import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
+import cpw.mods.fml.common.ITickHandler;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = "@MOD_ID@", name = "@MOD_NAME@", version = "@MOD_VERSION@", clientSideOnly = true,
-     acceptedMinecraftVersions = "[@MINECRAFT_VERSION@]", canBeDeactivated = true,
-	 guiFactory = "host.leak.togglesneak.ToggleSneakGuiFactory")
-public class ToggleSneak {
+@Mod(modid = ToggleSneak.MODID, name = "Toggle Sneak&Sprint", version = "1.1.0",
+     acceptedMinecraftVersions = "[1.5.2]")
+public class ToggleSneak implements ITickHandler {
 	public static final String MODID = "togglesneak";
 
 	public static Configuration config;
@@ -51,50 +49,53 @@ public class ToggleSneak {
 	private final MovementInputModded mim = new MovementInputModded(mc.gameSettings, this);
 	public final GuiDrawer guiDrawer = new GuiDrawer(this, mim);
 
-	@EventHandler
+	@Mod.PreInit
 	public void preInit(FMLPreInitializationEvent event) {
 
-		config = new Configuration(event.getSuggestedConfigurationFile(), Integer.toString(configVersionMod));
-		config.setCategoryComment(Configuration.CATEGORY_GENERAL, "ATTENTION: Editing this file manually is no longer necessary. \n" +
-				"Use the Mods button on Minecraft's home screen to modify these settings.");
-		try { configVersionFile = Integer.parseInt(config.getLoadedConfigVersion()); } catch (NumberFormatException e) { };
+		config = new Configuration(event.getSuggestedConfigurationFile());
+		config.load();
+		config.addCustomCategoryComment(Configuration.CATEGORY_GENERAL, "Toggle Sneak&Sprint settings.");
 		while (configVersionFile < configVersionMod) upgradeConfigFrom(configVersionFile++);
 		syncConfig();
 	}
 
-	@EventHandler
+	@Mod.Init
 	public void init(FMLInitializationEvent event) {
         kbList = getKeyBindings();
-        for(KeyBinding kb: kbList) ClientRegistry.registerKeyBinding(kb);
+        KeyBindingRegistry.registerKeyBinding(new KeyHandler(kbList.toArray(new KeyBinding[kbList.size()]), new boolean[kbList.size()]) {
+			@Override
+			public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat) {
+				if (tickEnd && isRepeat) onKeyInput(kb);
+			}
 
-		MinecraftForge.EVENT_BUS.register(this);
-	}
+			@Override
+			public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
+			}
 
-	@EventHandler
-	public void deactivate(FMLModDisabledEvent event) {
-		// this class instance is already unregistered from the event bus by Forge itself
-		MinecraftForge.EVENT_BUS.unregister(guiDrawer);
-		if (mc.player != null)
-			mc.player.movementInput = new MovementInputFromOptions(mc.gameSettings);
-	}
+			@Override
+			public EnumSet<TickType> ticks() {
+				return EnumSet.of(TickType.CLIENT);
+			}
 
-	@SubscribeEvent
-	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-
-		if (eventArgs.getModID().equals("@MOD_ID@")) syncConfig();
+			@Override
+			public String getLabel() {
+				return "ToggleSneakKeyHandler";
+			}
+        });
+        TickRegistry.registerTickHandler(this, Side.CLIENT);
 	}
 
 	public void syncConfig() {
 
-		toggleSneak = config.getBoolean("toggleSneakEnabled", Configuration.CATEGORY_GENERAL, toggleSneak, "Will the sneak toggle function be enabled on startup?", "togglesneak.config.panel.sneak");
-		toggleSprint = config.getBoolean("toggleSprintEnabled", Configuration.CATEGORY_GENERAL, toggleSprint, "Will the sprint toggle function be enabled on startup?", "togglesneak.config.panel.sprint");
-		sprintOverridesSneak = config.getBoolean("sprintOverridesSneak", Configuration.CATEGORY_GENERAL, sprintOverridesSneak, "Will pressing the sprint key untoggle sneak?", "togglesneak.config.panel.sprintoverridessneak");
-		flyBoost = config.getBoolean("flyBoostEnabled", Configuration.CATEGORY_GENERAL, flyBoost, "Fly boost activated by sprint key in creative mode", "togglesneak.config.panel.flyboost");
-		flyBoostFactor = config.getFloat("flyBoostFactor", Configuration.CATEGORY_GENERAL, flyBoostFactor, 1.0F, 8.0F, "Speed multiplier for fly boost", "togglesneak.config.panel.flyboostfactor");
-		hudEnabled = config.getBoolean("hudEnabled", Configuration.CATEGORY_GENERAL, hudEnabled, "Will the status HUD be shown?", "togglesneak.config.panel.hud");
-		statusDisplay = config.getString("statusDisplay", Configuration.CATEGORY_GENERAL, statusDisplay, "Status display style", statusDisplayOpts, "togglesneak.config.panel.display");
-		displayHPos = config.getString("displayHPosition", Configuration.CATEGORY_GENERAL, displayHPos, "Horizontal position of onscreen display", displayHPosOpts, "togglesneak.config.panel.hpos");
-		displayVPos = config.getString("displayVPosition", Configuration.CATEGORY_GENERAL, displayVPos, "Vertical position of onscreen display", displayVPosOpts, "togglesneak.config.panel.vpos");
+		toggleSneak = config.get(Configuration.CATEGORY_GENERAL, "toggleSneakEnabled", toggleSneak, "Will the sneak toggle function be enabled on startup?").getBoolean(toggleSneak);
+		toggleSprint = config.get(Configuration.CATEGORY_GENERAL, "toggleSprintEnabled", toggleSprint, "Will the sprint toggle function be enabled on startup?").getBoolean(toggleSprint);
+		sprintOverridesSneak = config.get(Configuration.CATEGORY_GENERAL, "sprintOverridesSneak", sprintOverridesSneak, "Will pressing the sprint key untoggle sneak?").getBoolean(sprintOverridesSneak);
+		flyBoost = config.get(Configuration.CATEGORY_GENERAL, "flyBoostEnabled", flyBoost, "Fly boost activated by sprint key in creative mode").getBoolean(flyBoost);
+		flyBoostFactor = (float) config.get(Configuration.CATEGORY_GENERAL, "flyBoostFactor", (double) flyBoostFactor, "Speed multiplier for fly boost").getDouble(flyBoostFactor);
+		hudEnabled = config.get(Configuration.CATEGORY_GENERAL, "hudEnabled", hudEnabled, "Will the status HUD be shown?").getBoolean(hudEnabled);
+		statusDisplay = config.get(Configuration.CATEGORY_GENERAL, "statusDisplay", statusDisplay, "Status display style").getString();
+		displayHPos = config.get(Configuration.CATEGORY_GENERAL, "displayHPosition", displayHPos, "Horizontal position of onscreen display").getString();
+		displayVPos = config.get(Configuration.CATEGORY_GENERAL, "displayVPosition", displayVPos, "Vertical position of onscreen display").getString();
 		config.getCategory(Configuration.CATEGORY_GENERAL).remove("keyHoldTicks");
 		guiDrawer.setDrawPosition(displayHPos, displayVPos, displayHPosOpts, displayVPosOpts);
 		config.save();
@@ -105,7 +106,7 @@ public class ToggleSneak {
 		case 0:   // upgrade to version 1: convert displayStatus to string option
 			if (config.hasKey(Configuration.CATEGORY_GENERAL,"displayEnabled")) {
 				if (!config.hasKey(Configuration.CATEGORY_GENERAL,"statusDisplay")) 
-					statusDisplay = config.getBoolean("displayEnabled", Configuration.CATEGORY_GENERAL, true, "dummy")
+					statusDisplay = config.get(Configuration.CATEGORY_GENERAL, "displayEnabled", true, "dummy").getBoolean(true)
 						? statusDisplayOpts[1] : statusDisplayOpts[0];
 				config.getCategory(Configuration.CATEGORY_GENERAL).remove("displayEnabled");
 			}
@@ -116,36 +117,39 @@ public class ToggleSneak {
 	public List<KeyBinding> getKeyBindings() {
 		
 		List<KeyBinding> list = new ArrayList<KeyBinding>();		
-		list.add(sneakBinding = new KeyBinding("togglesneak.key.toggle.sneak", Keyboard.KEY_G, "togglesneak.key.categories"));
-		list.add(sprintBinding = new KeyBinding("togglesneak.key.toggle.sprint", Keyboard.KEY_V, "togglesneak.key.categories"));
+		list.add(sneakBinding = new KeyBinding("Sneak function enable/disable", org.lwjgl.input.Keyboard.KEY_G));
+		list.add(sprintBinding = new KeyBinding("Sprint function enable/disable", org.lwjgl.input.Keyboard.KEY_V));
 		return list;
 	}
 
-	@EventHandler
+	@Mod.PostInit
 	public void postLoad(FMLPostInitializationEvent event) {
 	
 		MinecraftForge.EVENT_BUS.register(guiDrawer);
 	}
 
-	@SubscribeEvent
-	public void clientTick(ClientTickEvent event) {
-		
-		clientTick();
+	@Override
+	public void tickStart(EnumSet<TickType> type, Object... tickData) {
 	}
 
-	public void clientTick() {
-		
-		if ((mc.player != null) && (!(mc.player.movementInput instanceof MovementInputModded))) {
-			mc.player.movementInput = mim;
+	@Override
+	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
+		if (mc.thePlayer != null) {
+			EntityPlayerSP player = mc.thePlayer;
+			if (!(player.movementInput instanceof MovementInputModded)) {
+				player.movementInput = mim;
+			}
 		}
 	}
-	
-	@SubscribeEvent
-	public void onKeyInput(KeyInputEvent event) {
 
-		for(KeyBinding kb: kbList) {
-			if (kb.isKeyDown()) onKeyInput(kb);
-		}
+	@Override
+	public EnumSet<TickType> ticks() {
+		return EnumSet.of(TickType.CLIENT);
+	}
+
+	@Override
+	public String getLabel() {
+		return MODID;
 	}
 
 	public void onKeyInput(KeyBinding kb) {

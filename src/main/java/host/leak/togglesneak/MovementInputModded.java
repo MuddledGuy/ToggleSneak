@@ -2,10 +2,15 @@ package host.leak.togglesneak;
 
 import java.text.DecimalFormat;
 
+import org.lwjgl.input.Keyboard;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.init.MobEffects;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.MovementInput;
 
 public class MovementInputModded extends MovementInput {
@@ -16,7 +21,7 @@ public class MovementInputModded extends MovementInput {
 	private Minecraft mc;
 	private boolean sneakWasPressed;
 	private boolean sprintWasPressed;
-	private EntityPlayerSP player;
+	private EntityPlayer player;
 	private float originalFlySpeed = -1.0F;
 	private float boostedFlySpeed;
 
@@ -31,22 +36,22 @@ public class MovementInputModded extends MovementInput {
 
 	public void updatePlayerMoveState() {
 		
-		player = mc.player;
+		player = mc.thePlayer;
 		moveStrafe = 0.0F;
 		moveForward = 0.0F;
 
-		if (this.forwardKeyDown = gameSettings.keyBindForward.isKeyDown()) moveForward++;
-		if (this.backKeyDown = gameSettings.keyBindBack.isKeyDown()) moveForward--;
-		if (this.leftKeyDown = gameSettings.keyBindLeft.isKeyDown()) moveStrafe++;
-		if (this.rightKeyDown = gameSettings.keyBindRight.isKeyDown()) moveStrafe--;
+		if (isKeyDown(gameSettings.keyBindForward)) moveForward++;
+		if (isKeyDown(gameSettings.keyBindBack)) moveForward--;
+		if (isKeyDown(gameSettings.keyBindLeft)) moveStrafe++;
+		if (isKeyDown(gameSettings.keyBindRight)) moveStrafe--;
 
-		jump = gameSettings.keyBindJump.isKeyDown();
+		jump = isKeyDown(gameSettings.keyBindJump);
 		
-		boolean physicalSneak = gameSettings.keyBindSneak.isKeyDown();
-		boolean physicalSprint = gameSettings.keyBindSprint.isKeyDown();
+		boolean physicalSneak = isKeyDown(gameSettings.keyBindSneak);
+		boolean physicalSprint = Keyboard.isKeyDown(Keyboard.KEY_V);
 		if (ITS.toggleSneak) {
 			if (physicalSneak && !sneakWasPressed) {
-				if (sneak || (!player.isRiding() && !player.capabilities.isFlying)) {
+				if (sneak || (!isRiding(player) && !player.capabilities.isFlying)) {
 					sneak = !sneak;
 				}
 			}
@@ -70,19 +75,19 @@ public class MovementInputModded extends MovementInput {
 		// sprint conditions same as in net.minecraft.client.entity.EntityPlayerSP.onLivingUpdate()
 		// check for hungry or flying. But nvm, if conditions not met, sprint will 
 		// be canceled there afterwards anyways 
-		if (sprint && moveForward == 1.0F && player.onGround && !player.isHandActive()
-				&& !player.isPotionActive(MobEffects.BLINDNESS)) player.setSprinting(true);
+		if (sprint && moveForward == 1.0F && isOnGround(player) && !player.isUsingItem()
+				&& !isPotionActive(player, Potion.blindness)) setSprinting(player, true);
 		
 		if (ITS.flyBoost && player.capabilities.isCreativeMode && player.capabilities.isFlying 
-				&& (mc.getRenderViewEntity() == player) && sprint) {
+				&& (mc.renderViewEntity == player) && sprint) {
 			
 			if (originalFlySpeed < 0.0F || this.player.capabilities.getFlySpeed() != boostedFlySpeed)
 				originalFlySpeed = this.player.capabilities.getFlySpeed();
 			boostedFlySpeed = originalFlySpeed * ITS.flyBoostFactor;
 			player.capabilities.setFlySpeed(boostedFlySpeed);
 			
-			if (sneak) player.motionY -= 0.15D * (double)(ITS.flyBoostFactor - 1.0F);
-			if (jump) player.motionY += 0.15D * (double)(ITS.flyBoostFactor - 1.0F);
+			if (sneak) addMotionY(player, -0.15D * (double)(ITS.flyBoostFactor - 1.0F));
+			if (jump) addMotionY(player, 0.15D * (double)(ITS.flyBoostFactor - 1.0F));
 				
 		} else {
 			if (player.capabilities.getFlySpeed() == boostedFlySpeed)
@@ -98,10 +103,11 @@ public class MovementInputModded extends MovementInput {
 		// found here https://github.com/DouweKoopmans/ToggleSneak/blob/master/src/main/java/deez/togglesneak/CustomMovementInput.java
 		
 		String displayText = "";
-		boolean isFlying = mc.player.capabilities.isFlying;
-		boolean isRiding = mc.player.isRiding();
-		boolean isHoldingSneak = gameSettings.keyBindSneak.isKeyDown();
-		boolean isHoldingSprint = gameSettings.keyBindSprint.isKeyDown();
+		EntityPlayer player = mc.thePlayer;
+		boolean isFlying = player.capabilities.isFlying;
+		boolean isRiding = isRiding(player);
+		boolean isHoldingSneak = isKeyDown(gameSettings.keyBindSneak);
+		boolean isHoldingSprint = Keyboard.isKeyDown(Keyboard.KEY_V);
 		
 		if (isFlying) {
 			if (originalFlySpeed > 0.0F) {
@@ -126,5 +132,29 @@ public class MovementInputModded extends MovementInput {
 		}
 		
 		return displayText.trim();
+	}
+
+	private boolean isKeyDown(net.minecraft.client.settings.KeyBinding keyBinding) {
+		return GameSettings.isKeyDown(keyBinding);
+	}
+
+	private boolean isRiding(EntityPlayer player) {
+		return ((Entity) player).ridingEntity != null;
+	}
+
+	private boolean isOnGround(EntityPlayer player) {
+		return ((Entity) player).onGround;
+	}
+
+	private boolean isPotionActive(EntityPlayer player, Potion potion) {
+		return ((EntityLiving) player).isPotionActive(potion);
+	}
+
+	private void setSprinting(EntityPlayer player, boolean sprinting) {
+		((Entity) player).setSprinting(sprinting);
+	}
+
+	private void addMotionY(EntityPlayer player, double amount) {
+		((Entity) player).motionY += amount;
 	}
 }

@@ -3,10 +3,9 @@ package host.leak.togglesneak;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.resources.I18n;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.event.ForgeSubscribe;
 
 public class GuiDrawer extends Gui {
 
@@ -30,16 +29,16 @@ public class GuiDrawer extends Gui {
 		
 		this.hPos = hPos; this.vPos = vPos;
 		this.hPosOptions = hPosOptions; this.vPosOptions = vPosOptions;
-		sprintTxt = I18n.format("togglesneak.display.label.sprint");
-		sneakTxt = I18n.format("togglesneak.display.label.sneak");
+		sprintTxt = "Sprint";
+		sneakTxt = "Sneak";
         mcDisplayWidth = -1;
         mcDisplayHeight = -1;
 	}
 
-	@SubscribeEvent
+	@ForgeSubscribe
 	public void afterDraw (RenderGameOverlayEvent.Post event) {
 
-		if (event.getType() != ElementType.ALL) return;
+		if (event.type != ElementType.ALL) return;
 		if (ZTS.displayStatus() == 1) {
 			computeDrawPosIfChanged();
 			drawRect(rectX1, rectSnY1, rectX2, rectSnY2, ZTS.toggleSneak?colorPack(0,0,196,196):colorPack(196,196,196,64));	    	
@@ -59,7 +58,7 @@ public class GuiDrawer extends Gui {
 		
 		if ((mcDisplayWidth == mc.displayWidth) && (mcDisplayHeight == mc.displayHeight)) return;
 		
-        ScaledResolution scaledresolution = new ScaledResolution(mc);
+        ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
 		
         int displayWidth = scaledresolution.getScaledWidth();
 		int textWidth = Math.max(mc.fontRenderer.getStringWidth(sprintTxt), mc.fontRenderer.getStringWidth(sneakTxt));
@@ -99,7 +98,7 @@ public class GuiDrawer extends Gui {
 
 	public void computeTextPos(String displayTxt) {
 		
-        ScaledResolution scaledresolution = new ScaledResolution(mc);
+        ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
 		
         int displayWidth = scaledresolution.getScaledWidth();
 		int textWidth = mc.fontRenderer.getStringWidth(displayTxt);
