@@ -3,27 +3,26 @@ package host.leak.togglesneak;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.input.Keyboard;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.MovementInputFromOptions;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLModDisabledEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.client.event.ConfigChangedEvent;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLModDisabledEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 
-@Mod(modid = "@MOD_ID@", name = "@MOD_NAME@", version = "@MOD_VERSION@", clientSideOnly = true,
+@Mod(modid = "@MOD_ID@", name = "@MOD_NAME@", version = "@MOD_VERSION@",
      acceptedMinecraftVersions = "[@MINECRAFT_VERSION@]", canBeDeactivated = true,
 	 guiFactory = "host.leak.togglesneak.ToggleSneakGuiFactory")
 public class ToggleSneak {
@@ -67,21 +66,21 @@ public class ToggleSneak {
         kbList = getKeyBindings();
         for(KeyBinding kb: kbList) ClientRegistry.registerKeyBinding(kb);
 
-		MinecraftForge.EVENT_BUS.register(this);
+		FMLCommonHandler.instance().bus().register(this);
 	}
 
 	@EventHandler
 	public void deactivate(FMLModDisabledEvent event) {
-		// this class instance is already unregistered from the event bus by Forge itself
+		FMLCommonHandler.instance().bus().unregister(this);
 		MinecraftForge.EVENT_BUS.unregister(guiDrawer);
-		if (mc.player != null)
-			mc.player.movementInput = new MovementInputFromOptions(mc.gameSettings);
+		if (mc.thePlayer != null)
+			mc.thePlayer.movementInput = new MovementInputFromOptions(mc.gameSettings);
 	}
 
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
 
-		if (eventArgs.getModID().equals("@MOD_ID@")) syncConfig();
+		if (eventArgs.modID.equals("@MOD_ID@")) syncConfig();
 	}
 
 	public void syncConfig() {
@@ -116,8 +115,8 @@ public class ToggleSneak {
 	public List<KeyBinding> getKeyBindings() {
 		
 		List<KeyBinding> list = new ArrayList<KeyBinding>();		
-		list.add(sneakBinding = new KeyBinding("togglesneak.key.toggle.sneak", Keyboard.KEY_G, "togglesneak.key.categories"));
-		list.add(sprintBinding = new KeyBinding("togglesneak.key.toggle.sprint", Keyboard.KEY_V, "togglesneak.key.categories"));
+		list.add(sneakBinding = new KeyBinding("togglesneak.key.toggle.sneak", org.lwjgl.input.Keyboard.KEY_G, "togglesneak.key.categories"));
+		list.add(sprintBinding = new KeyBinding("togglesneak.key.toggle.sprint", org.lwjgl.input.Keyboard.KEY_V, "togglesneak.key.categories"));
 		return list;
 	}
 
@@ -135,8 +134,8 @@ public class ToggleSneak {
 
 	public void clientTick() {
 		
-		if ((mc.player != null) && (!(mc.player.movementInput instanceof MovementInputModded))) {
-			mc.player.movementInput = mim;
+		if ((mc.thePlayer != null) && (!(mc.thePlayer.movementInput instanceof MovementInputModded))) {
+			mc.thePlayer.movementInput = mim;
 		}
 	}
 	
@@ -144,7 +143,7 @@ public class ToggleSneak {
 	public void onKeyInput(KeyInputEvent event) {
 
 		for(KeyBinding kb: kbList) {
-			if (kb.isKeyDown()) onKeyInput(kb);
+			if (kb.isPressed()) onKeyInput(kb);
 		}
 	}
 

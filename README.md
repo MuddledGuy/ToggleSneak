@@ -1,7 +1,7 @@
 ToggleSneak
 ===========
 
-ToggleSneak is a Minecraft Forge client mod for Minecraft 1.12.2 that lets
+ToggleSneak is a Minecraft Forge client mod for Minecraft 1.7.10 that lets
 players toggle sneak behavior and automatically sprint while moving forward.
 
 Features:

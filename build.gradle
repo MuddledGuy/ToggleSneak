@@ -15,11 +15,11 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'forge'
 
 compileJava.options.encoding = 'UTF-8'
 compileJava.sourceCompatibility = '1.7'
@@ -43,7 +43,14 @@ minecraft {
     replace '@MINECRAFT_VERSION@', project.minecraft_version
 }
 
+downloadClient.url = new net.minecraftforge.gradle.delayed.DelayedString(project, 'https://launcher.mojang.com/v1/objects/e80d9b3bf5085002218d4be59e668bac718abbc6/client.jar')
+downloadServer.url = new net.minecraftforge.gradle.delayed.DelayedString(project, 'https://launcher.mojang.com/v1/objects/952438ac4e01b4d115c5fc38f891710c4941df29/server.jar')
+
 dependencies {
+    configurations.all {
+        exclude group: 'tv.twitch', module: 'twitch-platform'
+    }
+
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
@@ -96,9 +103,10 @@ jar {
     from('src/main/java') { include 'assets/**' }
 }
 
-sourceJar {
+task sourceJar(type: Jar) {
     appendix = 'src'
 	classifier = ''
+    from sourceSets.main.allSource
 }
 
 artifacts {
