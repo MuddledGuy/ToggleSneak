@@ -1,7 +1,7 @@
 ToggleSneak
 ===========
 
-ToggleSneak is a Minecraft Forge client mod for Minecraft 1.12.2 that lets
+ToggleSneak is a Minecraft Forge/ModLoader client mod for Minecraft 1.2.5 that lets
 players toggle sneak behavior and automatically sprint while moving forward.
 
 Features:
@@ -13,7 +13,6 @@ Features:
 - Optional setting to untoggle Sneak by pressing the Sprint key.
 - Minimal HUD status display with configurable visibility, position, and style.
 - Avoid sneak toggling while dismounting or flying.
-- Optional creative-mode fly boost.
 
 ## Keybinds
 
@@ -27,28 +26,26 @@ These can be changed from Minecraft's Controls screen under the
 
 ## Configuration
 
-Open the ToggleSneak config screen from Minecraft's Mods menu.
+Minecraft Forge 1.2.5 does not provide the newer Mods menu config screen for
+this mod. Edit the config file directly instead:
+
+```text
+config/togglesneak.cfg
+```
 
 Available settings include:
 
 - Sneak function enabled on startup
 - Sprint function enabled on startup
 - Sprint key untoggles sneak
-- Fly boost function enabled
-- Fly boost multiplier
 - HUD enabled
 - HUD display style
 - HUD horizontal and vertical position
 
 ## Building
 
-This project uses ForgeGradle and the included Gradle wrapper.
-
-On first setup:
-
-```sh
-gradlew setupDecompWorkspace
-```
+This branch builds against the Minecraft 1.2.5 and Forge 3.4.9.171 jars
+installed by PrismLauncher.
 
 To build:
 
@@ -56,7 +53,9 @@ To build:
 gradlew build
 ```
 
-On non-Windows systems, use `./gradlew` instead of `gradlew`.
+On non-Windows systems, use `./gradlew` instead of `gradlew`. If PrismLauncher
+is installed somewhere other than the default AppData path, set `PRISM_ROOT` to
+the PrismLauncher directory before building.
 
 Built jars are created under `build/libs`.
 
