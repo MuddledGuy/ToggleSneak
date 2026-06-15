@@ -9,6 +9,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 displayURL="https://github.com/MuddledGuy/ToggleSneak"
+logoFile="assets/togglesneak/logo.png"
 credits="Based on BlueAnanas/ZebrasToggleSneak."
 authors="${mod_authors}"
 description='''${mod_description}'''
