@@ -30,11 +30,6 @@ public final class ToggleSneakConfig {
             .translation("togglesneak.config.panel.flyboostfactor")
             .defineInRange("flyBoostFactor", 4.0D, 1.0D, 8.0D);
 
-    public static final ForgeConfigSpec.IntValue KEY_HOLD_TICKS = BUILDER
-            .comment("Minimum key hold time in ticks to prevent toggle.")
-            .translation("togglesneak.config.panel.keyholdticks")
-            .defineInRange("keyHoldTicks", 7, 0, 200);
-
     public static final ForgeConfigSpec.BooleanValue HUD_ENABLED = BUILDER
             .comment("Will the status HUD be shown on startup?")
             .translation("togglesneak.config.panel.hud")

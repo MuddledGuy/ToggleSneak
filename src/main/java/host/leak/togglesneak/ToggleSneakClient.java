@@ -50,7 +50,6 @@ public final class ToggleSneakClient {
     private static boolean sprintToggled;
     private static boolean wasSneakPhysicallyDown;
     private static boolean wasSprintPhysicallyDown;
-    private static int sneakHeldTicks;
     private static float originalFlySpeed = -1.0F;
     private static float boostedFlySpeed;
 
@@ -79,19 +78,13 @@ public final class ToggleSneakClient {
             featureSettingsInitialized = true;
         }
 
-        while (TOGGLE_SNEAK_KEY.consumeClick()) {
-            sneakFeatureEnabled = !sneakFeatureEnabled;
-        }
-        while (TOGGLE_SPRINT_KEY.consumeClick()) {
-            sprintFeatureEnabled = !sprintFeatureEnabled;
-        }
-
         LocalPlayer player = MC.player;
+        handleDedicatedToggleKeys();
 
         if (!sneakFeatureEnabled) {
             sneakToggled = false;
-            sneakHeldTicks = 0;
             wasSneakPhysicallyDown = false;
+            wasSprintPhysicallyDown = false;
         }
         if (!sprintFeatureEnabled) {
             sprintToggled = false;
@@ -109,18 +102,23 @@ public final class ToggleSneakClient {
         LocalPlayer player = MC.player;
         boolean physicalSneak = isPhysicallyDown(MC.options.keyShift);
         boolean physicalSprint = isPhysicallyDown(MC.options.keySprint);
+        boolean sneakPressed = physicalSneak && !wasSneakPhysicallyDown;
+        boolean sprintPressed = physicalSprint && !wasSprintPhysicallyDown;
         Input input = event.getInput().keyPresses;
         boolean shift = input.shift();
         boolean sprint = input.sprint();
 
         if (sneakFeatureEnabled) {
-            updateSneakToggle(player, physicalSneak);
-            if (ToggleSneakConfig.SPRINT_OVERRIDES_SNEAK.get() && physicalSprint && !wasSprintPhysicallyDown) {
+            if (sneakPressed) {
+                toggleSneakState(player);
+            }
+            if (ToggleSneakConfig.SPRINT_OVERRIDES_SNEAK.get() && sprintPressed) {
                 sneakToggled = false;
-                sneakHeldTicks = 0;
             }
             shift = physicalSneak || sneakToggled;
         }
+
+        wasSneakPhysicallyDown = physicalSneak;
         wasSprintPhysicallyDown = physicalSprint;
 
         if (sprintFeatureEnabled) {
@@ -152,13 +150,29 @@ public final class ToggleSneakClient {
         }
     }
 
+    private static void handleDedicatedToggleKeys() {
+        while (TOGGLE_SNEAK_KEY.consumeClick()) {
+            sneakFeatureEnabled = !sneakFeatureEnabled;
+            if (!sneakFeatureEnabled) {
+                sneakToggled = false;
+                wasSneakPhysicallyDown = false;
+                wasSprintPhysicallyDown = false;
+            }
+        }
+        while (TOGGLE_SPRINT_KEY.consumeClick()) {
+            sprintFeatureEnabled = !sprintFeatureEnabled;
+            if (!sprintFeatureEnabled) {
+                sprintToggled = false;
+            }
+        }
+    }
+
     static void applyConfigFeatureState() {
         sneakFeatureEnabled = ToggleSneakConfig.TOGGLE_SNEAK.get();
         sprintFeatureEnabled = ToggleSneakConfig.TOGGLE_SPRINT.get();
 
         if (!sneakFeatureEnabled) {
             sneakToggled = false;
-            sneakHeldTicks = 0;
             wasSneakPhysicallyDown = false;
             wasSprintPhysicallyDown = false;
         }
@@ -167,22 +181,10 @@ public final class ToggleSneakClient {
         }
     }
 
-    private static void updateSneakToggle(LocalPlayer player, boolean physicalSneak) {
-        if (physicalSneak) {
-            if (!wasSneakPhysicallyDown) {
-                sneakHeldTicks = 1;
-                sneakToggled = !(sneakToggled || player.isPassenger() || player.getAbilities().flying);
-            } else if (sneakHeldTicks > 0) {
-                sneakHeldTicks++;
-            }
-        } else if (wasSneakPhysicallyDown) {
-            if (ToggleSneakConfig.KEY_HOLD_TICKS.get() > 0 && sneakHeldTicks > ToggleSneakConfig.KEY_HOLD_TICKS.get()) {
-                sneakToggled = false;
-            }
-            sneakHeldTicks = 0;
+    private static void toggleSneakState(LocalPlayer player) {
+        if (sneakToggled || (!player.isPassenger() && !player.getAbilities().flying)) {
+            sneakToggled = !sneakToggled;
         }
-
-        wasSneakPhysicallyDown = physicalSneak;
     }
 
     private static boolean isPhysicallyDown(KeyMapping keyMapping) {
