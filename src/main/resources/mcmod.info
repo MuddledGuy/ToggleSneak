@@ -3,7 +3,7 @@
   "modlist": [{
     "modid": "togglesneak",
     "name": "Toggle Sneak&Sprint",
-    "description": "Sneak and sprint behavior can be enabled or disabled with configurable keybinds.\\nSneak can be toggled with the normal sneak key while the sneak function is enabled. Sprint automatically engages while moving forward when the sprint function is enabled.\\nSome extras:\\n + Optional HUD status display\\n + Optional sprint key untoggles sneak setting\\n + No sneak toggle if dismounting or flying\\n + Flying speed can be boosted in creative mode.",
+    "description": "Sneak and sprint behavior can be enabled or disabled with configurable keybinds. Sneak can be toggled with the normal sneak key while the sneak function is enabled. Sprint automatically engages while moving forward when the sprint function is enabled. Includes an optional HUD status display, sprint key untoggles sneak setting, dismount and flying safeguards, and creative-mode fly boost.",
     "version": "${mod_version}",
     "mcversion": "${minecraft_version}",
     "url": "",
