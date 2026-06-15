@@ -8,7 +8,8 @@ Features:
 
 - Toggle sneak and sprint with normal movement key presses.
 - Enable or disable toggle behavior with configurable in-game keybinds.
-- Configure key hold timing.
+- Hide or show the minimal HUD from the in-game config screen.
+- Optionally untoggle sneak by pressing the sprint key.
 - Avoid sneak toggling while dismounting or flying.
 - Boost creative flying speed with the sprint key.
 

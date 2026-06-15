@@ -34,9 +34,10 @@ public class ToggleSneak {
 	private int configVersionFile = 0;
 	public boolean toggleSneak = true;
 	public boolean toggleSprint = false;
+	public boolean sprintOverridesSneak = false;
 	public boolean flyBoost = false;
 	public float flyBoostFactor = 4.0F;
-	public int keyHoldTicks = 7;
+	public boolean hudEnabled = true;
 	private final String statusDisplayOpts[] = {"no display", "color coded", "text only"};
 	public String statusDisplay = statusDisplayOpts[1];
 	private final String displayHPosOpts[] = {"left", "center", "right"};
@@ -72,7 +73,7 @@ public class ToggleSneak {
 	@EventHandler
 	public void deactivate(FMLModDisabledEvent event) {
 		// this class instance is already unregistered from the event bus by Forge itself
-		if (displayStatus() > 0) MinecraftForge.EVENT_BUS.unregister(guiDrawer);		
+		MinecraftForge.EVENT_BUS.unregister(guiDrawer);
 		if (mc.player != null)
 			mc.player.movementInput = new MovementInputFromOptions(mc.gameSettings);
 	}
@@ -87,12 +88,14 @@ public class ToggleSneak {
 
 		toggleSneak = config.getBoolean("toggleSneakEnabled", Configuration.CATEGORY_GENERAL, toggleSneak, "Will the sneak toggle function be enabled on startup?", "togglesneak.config.panel.sneak");
 		toggleSprint = config.getBoolean("toggleSprintEnabled", Configuration.CATEGORY_GENERAL, toggleSprint, "Will the sprint toggle function be enabled on startup?", "togglesneak.config.panel.sprint");
+		sprintOverridesSneak = config.getBoolean("sprintOverridesSneak", Configuration.CATEGORY_GENERAL, sprintOverridesSneak, "Will pressing the sprint key untoggle sneak?", "togglesneak.config.panel.sprintoverridessneak");
 		flyBoost = config.getBoolean("flyBoostEnabled", Configuration.CATEGORY_GENERAL, flyBoost, "Fly boost activated by sprint key in creative mode", "togglesneak.config.panel.flyboost");
 		flyBoostFactor = config.getFloat("flyBoostFactor", Configuration.CATEGORY_GENERAL, flyBoostFactor, 1.0F, 8.0F, "Speed multiplier for fly boost", "togglesneak.config.panel.flyboostfactor");
-		keyHoldTicks = config.getInt("keyHoldTicks", Configuration.CATEGORY_GENERAL, keyHoldTicks, 0, 200, "Minimum key hold time in ticks to prevent toggle", "togglesneak.config.panel.keyholdticks");
+		hudEnabled = config.getBoolean("hudEnabled", Configuration.CATEGORY_GENERAL, hudEnabled, "Will the status HUD be shown?", "togglesneak.config.panel.hud");
 		statusDisplay = config.getString("statusDisplay", Configuration.CATEGORY_GENERAL, statusDisplay, "Status display style", statusDisplayOpts, "togglesneak.config.panel.display");
 		displayHPos = config.getString("displayHPosition", Configuration.CATEGORY_GENERAL, displayHPos, "Horizontal position of onscreen display", displayHPosOpts, "togglesneak.config.panel.hpos");
 		displayVPos = config.getString("displayVPosition", Configuration.CATEGORY_GENERAL, displayVPos, "Vertical position of onscreen display", displayVPosOpts, "togglesneak.config.panel.vpos");
+		config.getCategory(Configuration.CATEGORY_GENERAL).remove("keyHoldTicks");
 		guiDrawer.setDrawPosition(displayHPos, displayVPos, displayHPosOpts, displayVPosOpts);
 		config.save();
 	}
@@ -121,7 +124,7 @@ public class ToggleSneak {
 	@EventHandler
 	public void postLoad(FMLPostInitializationEvent event) {
 	
-		if (displayStatus() > 0) MinecraftForge.EVENT_BUS.register(guiDrawer);
+		MinecraftForge.EVENT_BUS.register(guiDrawer);
 	}
 
 	@SubscribeEvent
@@ -154,6 +157,7 @@ public class ToggleSneak {
 	}
 	
 	public int displayStatus() {
+		if (!hudEnabled) return 0;
 		for (int i=0; i < statusDisplayOpts.length; i++) 
 			if (statusDisplayOpts[i].equals(statusDisplay)) return i;
 		return 0;

@@ -14,8 +14,8 @@ public class MovementInputModded extends MovementInput {
 	public boolean sprint;
 	private ToggleSneak ITS;
 	private Minecraft mc;
-	private int sneakWasPressed;
-	private int sprintWasPressed;
+	private boolean sneakWasPressed;
+	private boolean sprintWasPressed;
 	private EntityPlayerSP player;
 	private float originalFlySpeed = -1.0F;
 	private float boostedFlySpeed;
@@ -25,8 +25,8 @@ public class MovementInputModded extends MovementInput {
 		this.sprint = false;
 		this.ITS = ITS;
 		this.mc = Minecraft.getMinecraft(); // we'll need replace the static ref by a link passed as parameter
-		this.sneakWasPressed = 0;
-		this.sprintWasPressed = 0;
+		this.sneakWasPressed = false;
+		this.sprintWasPressed = false;
 	}
 
 	public void updatePlayerMoveState() {
@@ -42,26 +42,21 @@ public class MovementInputModded extends MovementInput {
 
 		jump = gameSettings.keyBindJump.isKeyDown();
 		
+		boolean physicalSneak = gameSettings.keyBindSneak.isKeyDown();
+		boolean physicalSprint = gameSettings.keyBindSprint.isKeyDown();
 		if (ITS.toggleSneak) {
-			if (gameSettings.keyBindSneak.isKeyDown()) {
-				if (sneakWasPressed == 0) {
-					if (sneak) {
-						sneakWasPressed = -1;
-					} else if (player.isRiding() || player.capabilities.isFlying) {
-						sneakWasPressed = ITS.keyHoldTicks + 1;
-					} else {
-						sneakWasPressed = 1;
-					}
+			if (physicalSneak && !sneakWasPressed) {
+				if (sneak || (!player.isRiding() && !player.capabilities.isFlying)) {
 					sneak = !sneak;
-				} else if (sneakWasPressed > 0){
-					sneakWasPressed++;
 				}
-			} else {
-				if ((ITS.keyHoldTicks > 0) && (sneakWasPressed > ITS.keyHoldTicks)) sneak = false;
-				sneakWasPressed = 0;
 			}
+			sneakWasPressed = physicalSneak;
 		} else {
-			sneak = gameSettings.keyBindSneak.isKeyDown();
+			sneak = physicalSneak;
+			sneakWasPressed = false;
+		}
+		if (ITS.toggleSneak && ITS.sprintOverridesSneak && physicalSprint && !sprintWasPressed && !physicalSneak) {
+			sneak = false;
 		}
 		
 		if (sneak) {
@@ -69,25 +64,8 @@ public class MovementInputModded extends MovementInput {
 			moveForward *= 0.3F;
 		}
 		
-		if (ITS.toggleSprint) {
-			if (gameSettings.keyBindSprint.isKeyDown()) {
-				if (sprintWasPressed == 0) {
-					if (sprint) {
-						sprintWasPressed = -1;
-					} else if (player.capabilities.isFlying) {
-						sprintWasPressed = ITS.keyHoldTicks + 1;
-					} else {
-						sprintWasPressed = 1;
-					}
-					sprint = !sprint;
-				} else if (sprintWasPressed > 0){
-					sprintWasPressed++;
-				}
-			} else {
-				if ((ITS.keyHoldTicks > 0) && (sprintWasPressed > ITS.keyHoldTicks)) sprint = false;
-				sprintWasPressed = 0;
-			}
-		} else sprint = false;
+		sprintWasPressed = physicalSprint;
+		sprint = physicalSprint || (ITS.toggleSprint && moveForward == 1.0F && !sneak);
 		
 		// sprint conditions same as in net.minecraft.client.entity.EntityPlayerSP.onLivingUpdate()
 		// check for hungry or flying. But nvm, if conditions not met, sprint will 

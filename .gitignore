@@ -23,6 +23,7 @@
 ## custom
 /release
 /run
+/.tmp-*
 
 # some IDE things
 .project
