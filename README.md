@@ -40,6 +40,20 @@ Available settings include:
 - HUD display style
 - HUD horizontal and vertical position
 
+## Issues And Bug Reports
+
+Please report bugs on the
+[GitHub issues page](https://github.com/MuddledGuy/ToggleSneak/issues).
+
+When opening an issue, include:
+
+- Minecraft version and Forge version
+- ToggleSneak jar filename
+- Steps to reproduce the problem
+- What you expected to happen
+- What actually happened
+- Relevant logs or crash reports
+
 ## Building
 
 This project uses ForgeGradle and the included Gradle wrapper.
